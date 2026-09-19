@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Gerador de QR Code PIX estático no padrão oficial do Banco Central (BACEN/EMVCo). Crie, copie, baixe e imprima seu código de pagamento instantâneo."
+    />
+    <title>Gerador de QR Code PIX</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2300C4A5'/%3E%3Cpath d='M40 24v52M48 24h-8M40 30h10M40 60h10' stroke='white' stroke-width='7' stroke-linecap='round' fill='none'/%3E%3Cpath d='M52 32h16a6 6 0 0 1 0 12H58a6 6 0 0 0 0 12h14' stroke='white' stroke-width='7' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"
+    />
+  </head>
+  <body class="bg-slate-100 font-sans text-slate-800 antialiased">
+    <div id="app" class="page-shell">
+      <!-- ======= Cabeçalho ======= -->
+      <header class="no-print mx-auto w-full max-w-6xl px-4 pt-8 sm:px-6">
+        <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex items-center gap-4">
+            <div
+              class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-400 to-emerald-600 shadow-lg shadow-emerald-500/30"
+            >
+              <i data-lucide="scan-line" class="h-6 w-6 text-white"></i>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                Gerador de QR Code PIX
+              </h1>
+              <p class="text-sm text-slate-500">
+                Pagamento Instantâneo • Padrão EMVCo / BACEN
+              </p>
+            </div>
+          </div>
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700"
+          >
+            <i data-lucide="shield-check" class="h-3.5 w-3.5"></i>
+            100% client-side
+          </span>
+        </div>
+      </header>
+
+      <!-- ======= Conteúdo principal ======= -->
+      <main
+        class="mx-auto mt-8 grid w-full max-w-6xl gap-6 px-4 pb-16 sm:px-6 lg:grid-cols-5"
+      >
+        <!-- ============ Painel do formulário ============ -->
+        <section
+          class="no-print rounded-2xl bg-white p-6 shadow-lg shadow-slate-200/60 ring-1 ring-slate-900/5 sm:p-8 lg:col-span-3"
+        >
+          <div class="mb-6">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-slate-900">
+              <i data-lucide="wallet" class="h-5 w-5 text-emerald-600"></i>
+              Dados do recebimento
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+              Preencha a chave e o valor para gerar o QR Code PIX estático.
+            </p>
+          </div>
+
+          <form id="pix-form" class="space-y-6" novalidate>
+            <!-- Chave PIX -->
+            <div>
+              <label for="input-key" class="label">Chave PIX *</label>
+              <div class="relative">
+                <input
+                  id="input-key"
+                  name="key"
+                  type="text"
+                  autocomplete="off"
+                  maxlength="77"
+                  placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+                  class="input pr-24"
+                />
+                <button
+                  type="button"
+                  id="key-type"
+                  disabled
+                  class="pointer-events-none absolute inset-y-0 right-0 m-2 inline-flex items-center gap-1 rounded-lg bg-slate-100 px-2.5 text-xs font-semibold text-slate-500"
+                  title="Tipo de chave detectado automaticamente"
+                >
+                  <i data-lucide="key-round" class="h-3.5 w-3.5"></i>
+                  <span id="key-type-label">—</span>
+                </button>
+              </div>
+              <p id="key-feedback" class="mt-1.5 hidden text-sm"></p>
+
+              <!-- Seletor CPF ↔ Celular (chaves com 11 dígitos) -->
+              <div
+                id="key-toggle"
+                class="mt-3 hidden items-center gap-3"
+                role="group"
+                aria-label="Tipo da chave de 11 dígitos"
+              >
+                <span class="text-xs font-medium text-slate-400">
+                  Esta chave pode ser CPF ou celular. Qual é?
+                </span>
+                <div class="inline-flex rounded-xl bg-slate-100 p-1">
+                  <button
+                    type="button"
+                    data-force="cpf"
+                    class="rounded-lg px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:text-slate-900"
+                  >
+                    CPF
+                  </button>
+                  <button
+                    type="button"
+                    data-force="phone"
+                    class="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:text-slate-900"
+                  >
+                    Celular
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Valor -->
+            <div>
+              <label for="input-amount" class="label">Valor (R$) <span class="text-slate-400">— opcional</span></label>
+              <div class="relative">
+                <span
+                  class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-lg font-semibold text-slate-400"
+                >
+                  R$
+                </span>
+                <input
+                  id="input-amount"
+                  name="amount"
+                  type="text"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="0,00"
+                  class="input pl-12"
+                />
+              </div>
+              <p class="mt-1.5 text-sm text-slate-400">
+                Deixe vazio para gerar um QR Code sem valor (valor aberto).
+              </p>
+            </div>
+          <!-- Nome do recebedor -->
+            <div>
+              <label for="input-merchant-name" class="label">Nome do recebedor</label>
+              <input
+                id="input-merchant-name"
+                name="merchantName"
+                type="text"
+                autocomplete="off"
+                maxlength="25"
+                placeholder="Nome que aparecerá no QR Code"
+                class="input"
+              />
+              <p class="mt-1.5 text-sm text-slate-400">
+                Deixe em branco para usar o padrão do .env:
+                <strong id="merchant-name-fallback" class="font-semibold text-slate-600">—</strong>
+              </p>
+            </div>
+
+            <!-- Banco recebedor -->
+            <div>
+              <label for="input-merchant-bank" class="label">Banco recebedor</label>
+              <input
+                id="input-merchant-bank"
+                name="merchantBank"
+                type="text"
+                autocomplete="off"
+                maxlength="40"
+                placeholder="Banco que receberá o PIX"
+                class="input"
+              />
+              <p class="mt-1.5 text-sm text-slate-400">
+                Deixe em branco para usar o padrão do .env:
+                <strong id="merchant-bank-fallback" class="font-semibold text-slate-600">—</strong>
+              </p>
+            </div>
+          </form>
+        </section>
+
+        <!-- ============ Painel do QR Code ============ -->
+        <section
+          class="no-print rounded-2xl bg-white p-6 shadow-lg shadow-slate-200/60 ring-1 ring-slate-900/5 lg:col-span-2 lg:sticky lg:top-6 lg:self-start"
+        >
+          <div class="mb-5 flex items-center justify-between">
+            <h2 class="flex items-center gap-2 text-lg font-semibold text-slate-900">
+              <i data-lucide="qr-code" class="h-5 w-5 text-emerald-600"></i>
+              QR Code PIX
+            </h2>
+            <span
+              id="status-badge"
+              class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+            >
+              <i data-lucide="info" class="h-3.5 w-3.5"></i>
+              <span id="status-text">Aguardando dados</span>
+            </span>
+          </div>
+
+          <!-- Placeholder -->
+          <div
+            id="qr-placeholder"
+            class="flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-6 py-14 text-center"
+          >
+            <div class="rounded-2xl bg-white p-4 shadow-sm">
+              <i data-lucide="qr-code" class="h-14 w-14 text-slate-300"></i>
+            </div>
+            <div>
+              <p class="font-medium text-slate-600">Seu QR Code aparecerá aqui</p>
+              <p class="mt-1 max-w-xs text-sm text-slate-400">
+                Preencha a chave PIX para gerar o código.
+              </p>
+            </div>
+          </div>
+
+          <!-- QR renderizado -->
+          <div id="qr-stage" class="hidden">
+            <div
+              class="qr-anim mx-auto flex max-w-sm flex-col items-center gap-4 rounded-2xl bg-white p-5 ring-1 ring-slate-900/5"
+            >
+              <div class="rounded-2xl bg-white p-3 shadow-inner ring-1 ring-slate-100">
+                <canvas id="qr-canvas" class="block h-auto w-full max-w-[280px]"></canvas>
+              </div>
+              <p class="text-sm font-medium text-slate-500">
+                Escaneie com o app do seu banco ou instituição financeira
+              </p>
+            </div>
+
+            <!-- PIX Copia e Cola -->
+            <div class="mt-6">
+              <label for="pix-code" class="label">
+                PIX Copia e Cola
+              </label>
+              <div class="relative">
+                <textarea
+                  id="pix-code"
+                  readonly
+                  rows="4"
+                  spellcheck="false"
+                  class="input resize-none pr-14 font-mono text-xs leading-relaxed"
+                  aria-label="Código PIX Copia e Cola"
+                ></textarea>
+                <button
+                  type="button"
+                  id="btn-copy"
+                  class="absolute bottom-2 right-2 inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-slate-700 active:scale-95"
+                >
+                  <i data-lucide="copy" class="h-3.5 w-3.5"></i>
+                  Copiar
+                </button>
+              </div>
+              <input id="pix-code-raw" type="hidden" aria-hidden="true" />
+            </div>
+
+            <!-- Ações -->
+            <div class="mt-6 grid grid-cols-3 gap-3">
+              <button
+                type="button"
+                id="btn-download"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-500 active:scale-95"
+              >
+                <i data-lucide="download" class="h-4 w-4"></i>
+                Baixar
+              </button>
+              <button
+                type="button"
+                id="btn-print"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50 active:scale-95"
+              >
+                <i data-lucide="printer" class="h-4 w-4"></i>
+                Imprimir
+              </button>
+              <button
+                type="button"
+                id="btn-reset"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-50 active:scale-95"
+              >
+                <i data-lucide="refresh-cw" class="h-4 w-4"></i>
+                Limpar
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer
+        class="no-print mx-auto max-w-6xl px-4 pb-8 text-center text-xs text-slate-400 sm:px-6"
+      >
+        Gerado no navegador — nenhum dado é enviado a servidores. QR Code no padrão
+        <span class="font-semibold text-slate-500">EMVCo</span> e
+        <span class="font-semibold text-slate-500">Manual PIX BACEN</span>.
+      </footer>
+    </div>
+
+    <!-- ======= Folha de impressão ======= -->
+    <div id="print-sheet" class="print-sheet" aria-hidden="true">
+      <div class="ps-header">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-600"></div>
+        <div class="flex flex-col">
+          <strong class="text-lg leading-tight">PIX — Pagamento Instantâneo</strong>
+          <span class="text-xs opacity-70">QR Code no padrão EMVCo / BACEN</span>
+        </div>
+      </div>
+
+      <div class="ps-body">
+        <canvas id="print-canvas" class="ps-qr"></canvas>
+
+        <dl class="ps-details">
+          <div>
+            <dt>Recebedor</dt>
+            <dd id="print-name">—</dd>
+          </div>
+          <div>
+            <dt>Banco Recebedor</dt>
+            <dd id="print-bank">—</dd>
+          </div>
+          <div id="print-amount-row">
+            <dt>Valor</dt>
+            <dd id="print-amount">—</dd>
+          </div>
+          <div>
+            <dt>Chave PIX</dt>
+            <dd id="print-key">—</dd>
+          </div>
+          <div>
+            <dt>Emitido em</dt>
+            <dd id="print-date">—</dd>
+          </div>
+        </dl>
+
+        <div class="ps-code">
+          <span class="text-xs font-bold uppercase tracking-wider opacity-60">PIX Copia e Cola</span>
+          <code id="print-code">—</code>
+        </div>
+      </div>
+
+      <p class="ps-footer">Código de pagamento válido conforme regras do Banco Central do Brasil.</p>
+    </div>
+
+    <!-- ======= Toast ======= -->
+    <div id="toast-root" class="no-print fixed bottom-6 left-1/2 z-50 -translate-x-1/2"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

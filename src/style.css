@@ -1,0 +1,213 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Tokens do design system
+   ========================================================================== */
+
+@theme {
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue',
+    Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular,
+    Menlo, Consolas, monospace;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply text-slate-800 antialiased;
+    background:
+      radial-gradient(60rem 30rem at 110% -10%, rgba(16, 185, 129, 0.08), transparent 60%),
+      radial-gradient(50rem 25rem at -10% 110%, rgba(45, 212, 191, 0.08), transparent 60%),
+      #f8fafc;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: rgb(16 185 129 / 0.25);
+  }
+}
+
+/* ==========================================================================
+   Componentes auxiliares de formulário
+   ========================================================================== */
+
+@layer components {
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-slate-700;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-800
+      shadow-sm outline-none transition placeholder:text-slate-400
+      focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100;
+  }
+
+  .input-error {
+    @apply border-rose-300 bg-rose-50/40 focus:border-rose-400 focus:ring-rose-100;
+  }
+
+  .input-ok {
+    @apply border-emerald-300 focus:border-emerald-400 focus:ring-emerald-100;
+  }
+}
+
+/* ==========================================================================
+   Animação do QR Code
+   ========================================================================== */
+
+@keyframes qr-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.qr-anim {
+  animation: qr-pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   Toast
+   ========================================================================== */
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+}
+
+.toast-enter {
+  animation: toast-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast-leave {
+  animation: toast-out 300ms ease-in forwards;
+}
+
+/* ==========================================================================
+   Folha de impressão (oculta na tela)
+   ========================================================================== */
+
+.print-sheet {
+  display: none;
+}
+
+@media print {
+  body.printing #app,
+  body.printing .no-print,
+  body.printing #toast-root {
+    display: none !important;
+  }
+
+  body.printing .print-sheet {
+    display: block !important;
+  }
+
+  @page {
+    margin: 12mm;
+    size: A4 portrait;
+  }
+
+  .ps-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid #059669;
+    padding-bottom: 12px;
+    margin-bottom: 18px;
+  }
+
+  .ps-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ps-qr {
+    width: 220px;
+    height: 220px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px;
+  }
+
+  .ps-details {
+    width: 100%;
+    margin: 18px 0 14px;
+  }
+
+  .ps-details > div {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .ps-details dt {
+    flex: 0 0 120px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #475569;
+  }
+
+  .ps-details dd {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    word-break: break-all;
+  }
+
+  .ps-code {
+    width: 100%;
+    border: 1px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 12px;
+    background: #f8fafc;
+  }
+
+  .ps-code code {
+    display: block;
+    font-size: 9px;
+    line-height: 1.5;
+    color: #334155;
+    word-break: break-all;
+    margin-top: 4px;
+  }
+
+  .ps-footer {
+    margin-top: 16px;
+    font-size: 9px;
+    color: #94a3b8;
+    text-align: center;
+  }
+}
