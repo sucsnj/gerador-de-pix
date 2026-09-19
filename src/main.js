@@ -21,6 +21,14 @@ const MERCHANT_KEY = import.meta.env.VITE_MERCHANT_KEY ?? '';
 const MERCHANT_BANK = import.meta.env.VITE_MERCHANT_BANK ?? '';
 const MERCHANT_CITY = import.meta.env.VITE_MERCHANT_CITY ?? '';
 
+// Altera os valores no placeholder do formulário
+// Para o valor / chave
+document.getElementById('input-key').placeholder = import.meta.env.VITE_MERCHANT_KEY;
+// Para o nome do recebedor
+document.getElementById('input-merchant-name').placeholder = import.meta.env.VITE_MERCHANT_NAME;
+// Para o banco
+document.getElementById('input-merchant-bank').placeholder = import.meta.env.VITE_MERCHANT_BANK;
+
 const els = {
   form: $('pix-form'),
   key: $('input-key'),
