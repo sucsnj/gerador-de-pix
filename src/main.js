@@ -14,8 +14,10 @@ import { copyToClipboard, downloadQrPng, printPixSheet, showToast } from './comp
 
 const $ = (id) => document.getElementById(id);
 
-// Recebedor definido via variáveis de ambiente (não é mais campo do formulário).
+// Recebedor definido via variáveis de ambiente (usado como padrão quando o
+// respectivo campo do formulário estiver em branco).
 const MERCHANT_NAME = import.meta.env.VITE_MERCHANT_NAME ?? '';
+const MERCHANT_KEY = import.meta.env.VITE_MERCHANT_KEY ?? '';
 const MERCHANT_BANK = import.meta.env.VITE_MERCHANT_BANK ?? '';
 const MERCHANT_CITY = import.meta.env.VITE_MERCHANT_CITY ?? '';
 
@@ -25,6 +27,7 @@ const els = {
   keyTypeLabel: $('key-type-label'),
   keyFeedback: $('key-feedback'),
   keyToggle: $('key-toggle'),
+  merchantKeyFallback: $('merchant-key-fallback'),
   amount: $('input-amount'),
   merchantName: $('input-merchant-name'),
   merchantBank: $('input-merchant-bank'),
@@ -44,7 +47,7 @@ const els = {
   qrWrap: document.querySelector('#qr-stage .qr-anim'),
 };
 
-const form = initForm(els);
+const form = initForm(els, { merchantKey: MERCHANT_KEY });
 
 let lastPayload = '';
 let lastBuild = null;
@@ -190,6 +193,7 @@ els.btnReset.addEventListener('click', () => {
 form.onInput(updatePreview);
 initIcons();
 
+els.merchantKeyFallback.textContent = MERCHANT_KEY || '(não definido no .env)';
 els.merchantNameFallback.textContent = MERCHANT_NAME || '(não definido no .env)';
 els.merchantBankFallback.textContent = MERCHANT_BANK || '(não definido no .env)';
 

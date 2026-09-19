@@ -95,9 +95,13 @@ function renderToggle(toggle, active) {
  * @param {object} els Elementos do DOM.
  * @returns {{ onInput: (cb: () => void) => void, getState: () => typeof state, update: () => void, reset: () => void }}
  */
-export function initForm(els) {
+export function initForm(els, fallback = {}) {
+  const defaultKey = String(fallback.merchantKey ?? '').trim();
+
   const updateKey = () => {
-    const result = validatePixKey(els.key.value, state.keyForcedType);
+    const usingFallback = !els.key.value.trim() && defaultKey;
+    const source = usingFallback ? defaultKey : els.key.value;
+    const result = validatePixKey(source, state.keyForcedType);
     state.key = result.key;
     state.keyType = result.type;
     state.keyValid = result.valid;
@@ -112,7 +116,17 @@ export function initForm(els) {
       els.keyToggle.classList.add('hidden');
     }
 
-    if (result.error) {
+    if (usingFallback) {
+      if (result.valid) {
+        els.keyFeedback.className = `mt-1.5 text-sm font-medium text-emerald-600`;
+        els.keyFeedback.textContent = `Usando a chave padrão do .env (${result.label}).`;
+        els.key.classList.remove('input-error', 'input-ok');
+      } else {
+        els.keyFeedback.className = `mt-1.5 text-sm font-medium text-rose-500`;
+        els.keyFeedback.textContent = 'A chave padrão do .env é inválida.';
+        els.key.classList.add('input-error');
+      }
+    } else if (result.error) {
       els.keyFeedback.className = `mt-1.5 text-sm font-medium text-rose-500`;
       els.keyFeedback.textContent = result.error;
       els.key.classList.add('input-error');
@@ -164,6 +178,9 @@ export function initForm(els) {
 
   let changeCallback = () => {};
   const emitChange = () => changeCallback();
+
+  // Estado inicial: valida o fallback da chave (campo em branco usa o .env).
+  updateKey();
 
   return {
     onInput(cb) {
