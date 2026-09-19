@@ -119,7 +119,7 @@ export function initForm(els, fallback = {}) {
     if (usingFallback) {
       if (result.valid) {
         els.keyFeedback.className = `mt-1.5 text-sm font-medium text-emerald-600`;
-        els.keyFeedback.textContent = `Usando a chave padrão do .env (${result.label}).`;
+        els.keyFeedback.textContent = `Usando a chave padrão (${result.label}).`;
         els.key.classList.remove('input-error', 'input-ok');
       } else {
         els.keyFeedback.className = `mt-1.5 text-sm font-medium text-rose-500`;
