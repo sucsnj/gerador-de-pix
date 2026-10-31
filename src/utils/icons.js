@@ -9,6 +9,7 @@ import {
   createIcons,
   Check,
   CircleAlert,
+  Clock,
   Copy,
   Download,
   Info,
@@ -25,6 +26,7 @@ import {
 const icons = {
   Check,
   CircleAlert,
+  Clock,
   Copy,
   Download,
   Info,

@@ -52,6 +52,9 @@ const els = {
   btnDownload: $('btn-download'),
   btnPrint: $('btn-print'),
   btnReset: $('btn-reset'),
+  btnClearHistory: $('btn-clear-history'),
+  historyList: $('history-list'),
+  historyEmpty: $('history-empty'),
   qrWrap: document.querySelector('#qr-stage .qr-anim'),
 };
 
@@ -59,6 +62,82 @@ const form = initForm(els, { merchantKey: MERCHANT_KEY });
 
 let lastPayload = '';
 let lastBuild = null;
+let lastSavedPayload = '';
+let restoring = false;
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem('pix-history')) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(entry) {
+  if (restoring) return;
+  if (!entry.payload || entry.payload === lastSavedPayload) return;
+  lastSavedPayload = entry.payload;
+  const list = loadHistory();
+  list.unshift(entry);
+  if (list.length > 10) list.length = 10;
+  try {
+    localStorage.setItem('pix-history', JSON.stringify(list));
+renderHistory();
+updatePreview();
+  } catch {
+    // ignore quota errors
+  }
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  els.historyList.innerHTML = '';
+  if (!list.length) {
+    els.historyEmpty.classList.remove('hidden');
+    return;
+  }
+  els.historyEmpty.classList.add('hidden');
+  list.forEach((entry, index) => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className =
+      'flex w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50/40';
+    const date = entry.ts ? new Date(entry.ts).toLocaleString('pt-BR') : '';
+    const keyShort = (entry.key || '').slice(0, 28);
+    btn.innerHTML = `
+      <span class="truncate font-semibold text-slate-700">${escapeHtml(entry.name || '(sem nome)')}</span>
+      <span class="truncate text-xs text-slate-500">${escapeHtml(keyShort)}${keyShort.length < (entry.key || '').length ? '…' : ''}</span>
+      <span class="text-xs text-slate-400">${entry.amount ? `R$ ${entry.amount}` : 'Valor aberto'}${date ? ' • ' + date : ''}</span>
+    `;
+    btn.addEventListener('click', () => fillFromHistory(entry));
+    li.appendChild(btn);
+    els.historyList.appendChild(li);
+  });
+  initIcons(els.historyList);
+}
+
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function fillFromHistory(entry) {
+  restoring = true;
+  els.key.value = entry.key || '';
+  els.amount.value = entry.amount || '';
+  els.merchantName.value = entry.name || '';
+  els.merchantBank.value = entry.bank || '';
+  els.key.dispatchEvent(new Event('input', { bubbles: true }));
+  els.amount.dispatchEvent(new Event('input', { bubbles: true }));
+  els.merchantName.dispatchEvent(new Event('input', { bubbles: true }));
+  els.merchantBank.dispatchEvent(new Event('input', { bubbles: true }));
+  restoring = false;
+  updatePreview();
+}
 
 function setStatus(state, text) {
   const palette = {
@@ -113,6 +192,15 @@ function updatePreview() {
 
     els.placeholder.classList.add('hidden');
     els.stage.classList.remove('hidden');
+
+    saveHistory({
+      key: els.key.value,
+      amount: els.amount.value,
+      name: els.merchantName.value,
+      bank: els.merchantBank.value,
+      payload: build.payload,
+      ts: Date.now(),
+    });
 
     setStatus(build.payload.length > 512 ? 'error' : 'ok', 'QR Code pronto');
 
@@ -198,11 +286,42 @@ els.btnReset.addEventListener('click', () => {
 
 // ---- Inicialização ----
 
-form.onInput(updatePreview);
+const DEBOUNCE_MS = 600;
+let previewTimer = null;
+function schedulePreview() {
+  if (previewTimer) window.clearTimeout(previewTimer);
+  previewTimer = window.setTimeout(() => {
+    previewTimer = null;
+    updatePreview();
+  }, DEBOUNCE_MS);
+}
+
+form.onInput(schedulePreview);
 initIcons();
+
+els.key.placeholder = MERCHANT_KEY || els.key.placeholder;
+els.merchantName.placeholder = MERCHANT_NAME || els.merchantName.placeholder;
+els.merchantBank.placeholder = MERCHANT_BANK || els.merchantBank.placeholder;
 
 els.merchantKeyFallback.textContent = MERCHANT_KEY || '(não definido no .env)';
 els.merchantNameFallback.textContent = MERCHANT_NAME || '(não definido no .env)';
 els.merchantBankFallback.textContent = MERCHANT_BANK || '(não definido no .env)';
 
-updatePreview();
+els.btnClearHistory.addEventListener('click', () => {
+  try {
+    localStorage.removeItem('pix-history');
+  } catch {
+    // ignore
+  }
+  lastSavedPayload = '';
+  renderHistory();
+  showToast('Histórico limpo.');
+});
+
+// Restaura o último PIX gerado como referência.
+const history = loadHistory();
+if (history.length) {
+  fillFromHistory(history[0]);
+}
+
+renderHistory();
