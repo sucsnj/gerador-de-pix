@@ -303,9 +303,9 @@ els.key.placeholder = MERCHANT_KEY || els.key.placeholder;
 els.merchantName.placeholder = MERCHANT_NAME || els.merchantName.placeholder;
 els.merchantBank.placeholder = MERCHANT_BANK || els.merchantBank.placeholder;
 
-els.merchantKeyFallback.textContent = MERCHANT_KEY || '(não definido no .env)';
-els.merchantNameFallback.textContent = MERCHANT_NAME || '(não definido no .env)';
-els.merchantBankFallback.textContent = MERCHANT_BANK || '(não definido no .env)';
+// els.merchantKeyFallback.textContent = MERCHANT_KEY || '(não definido no .env)';
+// els.merchantNameFallback.textContent = MERCHANT_NAME || '(não definido no .env)';
+// els.merchantBankFallback.textContent = MERCHANT_BANK || '(não definido no .env)';
 
 els.btnClearHistory.addEventListener('click', () => {
   try {

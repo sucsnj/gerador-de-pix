@@ -1,0 +1,5 @@
+{
+  "appId": "com.qrcodepix.app",
+  "appName": "Gerador de QR Code PIX",
+  "webDir": "dist"
+}
