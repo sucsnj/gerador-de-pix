@@ -123,7 +123,7 @@ export function initForm(els, fallback = {}) {
         els.key.classList.remove('input-error', 'input-ok');
       } else {
         els.keyFeedback.className = `mt-1.5 text-sm font-medium text-rose-500`;
-        els.keyFeedback.textContent = 'A chave padrão do .env é inválida.';
+        els.keyFeedback.textContent = 'A chave padrão é inválida.';
         els.key.classList.add('input-error');
       }
     } else if (result.error) {

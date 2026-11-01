@@ -185,7 +185,7 @@ function updatePreview() {
   const bank = s.merchantBank.trim() || MERCHANT_BANK;
 
   if (!name.trim() || !MERCHANT_CITY.trim()) {
-    setStatus('error', 'Configure o recebedor no .env');
+    setStatus('error', 'Configure o recebedor (nome e cidade)');
     els.placeholder.classList.remove('hidden');
     els.stage.classList.add('hidden');
     lastPayload = '';
@@ -332,9 +332,9 @@ els.key.placeholder = MERCHANT_KEY || els.key.placeholder;
 els.merchantName.placeholder = MERCHANT_NAME || els.merchantName.placeholder;
 els.merchantBank.placeholder = MERCHANT_BANK || els.merchantBank.placeholder;
 
-// els.merchantKeyFallback.textContent = MERCHANT_KEY || '(não definido no .env)';
-// els.merchantNameFallback.textContent = MERCHANT_NAME || '(não definido no .env)';
-// els.merchantBankFallback.textContent = MERCHANT_BANK || '(não definido no .env)';
+els.merchantKeyFallback.textContent = MERCHANT_KEY || '(não definido)';
+els.merchantNameFallback.textContent = MERCHANT_NAME || '(não definido)';
+els.merchantBankFallback.textContent = MERCHANT_BANK || '(não definido)';
 
 els.btnClearHistory.addEventListener('click', () => {
   try {
