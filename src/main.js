@@ -99,10 +99,12 @@ function renderHistory() {
   els.historyEmpty.classList.add('hidden');
   list.forEach((entry, index) => {
     const li = document.createElement('li');
+    li.className = 'relative';
+
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className =
-      'flex w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50/40';
+      'flex w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50 p-3 pr-9 text-left text-sm transition hover:border-emerald-300 hover:bg-emerald-50/40';
     const date = entry.ts ? new Date(entry.ts).toLocaleString('pt-BR') : '';
     const keyShort = (entry.key || '').slice(0, 28);
     btn.innerHTML = `
@@ -112,9 +114,36 @@ function renderHistory() {
     `;
     btn.addEventListener('click', () => fillFromHistory(entry));
     li.appendChild(btn);
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.setAttribute('aria-label', 'Excluir item do histórico');
+    del.className =
+      'absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600';
+    del.innerHTML = '<i data-lucide="trash-2" class="h-3.5 w-3.5"></i>';
+    del.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteHistoryItem(index);
+    });
+    li.appendChild(del);
+
     els.historyList.appendChild(li);
   });
   initIcons(els.historyList);
+}
+
+function deleteHistoryItem(index) {
+  const list = loadHistory();
+  if (index < 0 || index >= list.length) return;
+  list.splice(index, 1);
+  try {
+    localStorage.setItem('pix-history', JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+  lastSavedPayload = list.length ? list[0].payload : '';
+  renderHistory();
+  showToast('Item removido do histórico.');
 }
 
 function escapeHtml(s) {
@@ -286,7 +315,7 @@ els.btnReset.addEventListener('click', () => {
 
 // ---- Inicialização ----
 
-const DEBOUNCE_MS = 600;
+const DEBOUNCE_MS = 1800;
 let previewTimer = null;
 function schedulePreview() {
   if (previewTimer) window.clearTimeout(previewTimer);

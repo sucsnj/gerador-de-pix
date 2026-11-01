@@ -20,6 +20,7 @@ import {
   ScanLine,
   Settings2,
   ShieldCheck,
+  Trash2,
   Wallet,
 } from 'lucide';
 
@@ -37,6 +38,7 @@ const icons = {
   ScanLine,
   Settings2,
   ShieldCheck,
+  Trash2,
   Wallet,
 };
 
